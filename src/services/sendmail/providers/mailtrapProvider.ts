@@ -19,10 +19,15 @@ export const send = async (
     }`;
     const transporter = nodemailer.createTransport(config);
     const response = await transporter.sendMail({ to: toEmail, subject, html: message, from });
+    response.messageId = response.messageId.replace('<', '').replace('>', '');
     transporter.close();
-    return response;
+    return {
+      error: false,
+      message: null,
+      mailtrapResponse: { envelope: response.envelope, messageId: response.messageId },
+      timestamp: Date.now()
+    };
   } catch (err) {
-    //console.log('Error', err);
-    return err;
+    return { error: true, message: err.response || 'Unable to send email via mailtrap' };
   }
 };
